@@ -1,24 +1,28 @@
 from binary_search_tree import * 
+import unittest
 
-# Testing
-# TODO Look into unit testing in Python
-tree = BinarySearchTree()
-tree.add(11)
-tree.add(3)
-tree.add(54)
-tree.add(6)
-tree.add(42)
-tree.add(95)
-tree.add(2)
-tree.add(45)
-tree.add(24)
-tree.add(23)
-tree.add(34)
-
-
-print("Expected: 3 Result: " + str(tree.searchMaxValueSmallerThan(6)))
-print("Expected: 34 Result: " + str(tree.searchMaxValueSmallerThan(35)))
-print("Expected: 42 Result: " + str(tree.searchMaxValueSmallerThan(44)))
-print("Expected: 45 Result: " + str(tree.searchMaxValueSmallerThan(54)))
-print("Expected: 54 Result: " + str(tree.searchMaxValueSmallerThan(55)))
-print("Expected: 95 Result: " + str(tree.searchMaxValueSmallerThan(100)))
+class BinarySearchTreeTests(unittest.TestCase):
+	def setUp(self):
+		self.tree = BinarySearchTree()
+		self.tree.add(11)
+		self.tree.add(3)
+		self.tree.add(54)
+		self.tree.add(6)
+		self.tree.add(42)
+		self.tree.add(95)
+		self.tree.add(2)
+		self.tree.add(45)
+		self.tree.add(24)
+		self.tree.add(23)
+		self.tree.add(34)
+		
+	def test_searchMaxValueSmallerThan(self):
+		self.assertEqual(3, self.tree.searchMaxValueSmallerThan(6))
+		self.assertEqual(34, self.tree.searchMaxValueSmallerThan(35))
+		self.assertEqual(42, self.tree.searchMaxValueSmallerThan(44))
+		self.assertEqual(45, self.tree.searchMaxValueSmallerThan(54))
+		self.assertEqual(54, self.tree.searchMaxValueSmallerThan(55))
+		self.assertEqual(95, self.tree.searchMaxValueSmallerThan(100))
+		
+if __name__ == '__main__':
+    unittest.main()
