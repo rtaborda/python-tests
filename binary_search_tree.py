@@ -11,11 +11,11 @@ class BinarySearchTree:
 		self.nodes = []
 	
 	# Adds the value to the tree, making sure it maintains the tree ordered
-	def Add(self, value):
-		node = Node(value, null, null)
+	def add(self, value):
+		node = Node(value, None, None)
 		
-		if self.nodes.count == 0:
-			self.nodes.add(node)
+		if len(self.nodes) == 0:
+			self.nodes.append(node)
 			return None
 			
 		current = self.nodes[0]
@@ -38,18 +38,18 @@ class BinarySearchTree:
 			
 		# add the new node on the left of the current if it's smaller
 		# otherwise add it on the right
-		if parent.Value > value:
-			parent.left = newNode
+		if parent.value > value:
+			parent.left = node
 		else:
-			parent.right = newNode
+			parent.right = node
 	
 	# Iterates through the tree, using recursion, to find the biggest value that is smaller than the limit passed to the method
-	def SearchMaxValueSmallerThan(self, limit):
-		ret = null
-		SearchMaxValueSmallerThan(limit, self.nodes[0], ret)
-		return ret
+	def searchMaxValueSmallerThan(self, limit):
+		ret = [None]
+		self.__searchMaxValueSmallerThan(limit, self.nodes[0], ret)
+		return ret[0]
 		
-	def SearchMaxValueSmallerThan(limit, node, ret):
+	def __searchMaxValueSmallerThan(self, limit, node, ret):
 		# if we reached the end of a branch, or if the current node value is bigger or equal
 		# to the limit and doesn't have a node on is left, it means we already found our value 
 		# on the previous iterations
@@ -58,29 +58,38 @@ class BinarySearchTree:
 
 		# only set the ret value if the current node value is smaller than the limit
 		if node.value < limit:
-			ret = node.value
+			ret[0] = node.value
 		
 		if node.value >= limit:
 			# if the current node value is bigger or equal to the limit go to the node's left branch
-			SearchMaxValueSmallerThan(limit, node.left, ret)
+			self.__searchMaxValueSmallerThan(limit, node.left, ret)
 		else:
 			# otherwise go to the node's right branch
-			SearchMaxValueSmallerThan(limit, node.right, ret)
+			self.__searchMaxValueSmallerThan(limit, node.right, ret)
 			
 			
 
 # Testing
-#tree = BinarySearchTree()
-#tree.Add(11)
-#tree.Add(3)
-#tree.Add(54)
-#tree.Add(6)
-#tree.Add(42)
-#tree.Add(95)
-#tree.Add(2)
-#tree.Add(45)
-#tree.Add(24)
-#tree.Add(23)
-#tree.Add(34)
+# TODO Look into unit testing in Python
+tree = BinarySearchTree()
+tree.add(11)
+tree.add(3)
+tree.add(54)
+tree.add(6)
+tree.add(42)
+tree.add(95)
+tree.add(2)
+tree.add(45)
+tree.add(24)
+tree.add(23)
+tree.add(34)
+
+
+print("Expected: 3 Result: " + str(tree.searchMaxValueSmallerThan(6)))
+print("Expected: 34 Result: " + str(tree.searchMaxValueSmallerThan(35)))
+print("Expected: 42 Result: " + str(tree.searchMaxValueSmallerThan(44)))
+print("Expected: 45 Result: " + str(tree.searchMaxValueSmallerThan(54)))
+print("Expected: 54 Result: " + str(tree.searchMaxValueSmallerThan(55)))
+print("Expected: 95 Result: " + str(tree.searchMaxValueSmallerThan(100)))
 	
 		
