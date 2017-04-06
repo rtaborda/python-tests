@@ -9,10 +9,11 @@ import random
 class PasswordGenerator:
 	def __init__(self):
 		self.specialCharacters = [ '£', '$', '€', '%', '&', '*', '@', '#' ]
+		self.minSize = 10
 		
 	def generatePassword(self, size):
-		if size < 10:
-			raise ValueError('Invalid size for the password: ' + str(size))
+		if size < self.minSize:
+			raise ValueError('The minimum size for the password is ' + str(self.minSize) + '. Size specified: ' + str(size))
 			
 		count = 0
 		password = ''
