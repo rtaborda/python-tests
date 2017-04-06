@@ -17,6 +17,7 @@ class BinarySearchTreeTests(unittest.TestCase):
 		self.tree.add(34)
 		
 	def test_searchMaxValueSmallerThan(self):
+		self.assertEqual(None, self.tree.searchMaxValueSmallerThan(2))
 		self.assertEqual(3, self.tree.searchMaxValueSmallerThan(6))
 		self.assertEqual(34, self.tree.searchMaxValueSmallerThan(35))
 		self.assertEqual(42, self.tree.searchMaxValueSmallerThan(44))
