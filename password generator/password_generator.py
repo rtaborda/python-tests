@@ -11,8 +11,8 @@ class PasswordGenerator:
 		self.specialCharacters = [ '£', '$', '€', '%', '&', '*', '@', '#' ]
 		
 	def generatePassword(self, size):
-		if size <= 10:
-			raise ValueError('Invalid size for the password: ' + size)
+		if size < 10:
+			raise ValueError('Invalid size for the password: ' + str(size))
 			
 		count = 0
 		password = ''
@@ -29,8 +29,3 @@ class PasswordGenerator:
 			count = count + 1
 		
 		return password
-		
-		
-# Usage example
-o = PasswordGenerator()
-print(o.generatePassword(30))
