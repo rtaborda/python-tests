@@ -3,7 +3,7 @@
 import requests
 import queue
 import threading
-#import time
+import time
 
 class Sensor:
 	def __init__(self, url, httpMethod, headers, body, expectedStatusCode, maxResponsetime, testInterval):
@@ -23,40 +23,46 @@ class Monitor:
 	def __timedelta_milliseconds(self, td):
 		return td.days*86400000 + td.seconds*1000 + td.microseconds/1000
 
-	def __testSensor(self, session, request):
-		response = session.send(request)
-		self.q.put(response)
+	def __testSensor(self, session, request, interval):
+		while True:
+			response = session.send(request)
+			self.q.put(response)
+			#time.sleep(1)
+	
+	def __consumer(self):
+		while True:
+			# print responses
+			response = self.q.get()
 		
+			print(response.status_code)
+			print(str(self.__timedelta_milliseconds(response.elapsed)) + ' ms')
+			print(response.json())
+			print()
+		
+			self.q.task_done()
+	
 	def addSensor(self, sensor):
 		self.sensors.append(sensor)
 		
 	def start(self):
-		preppedRequests = []
+		# start consumer thread
+		consumer = threading.Thread(target = self.__consumer)
+		consumer.daemon = True
+		consumer.start()
 		
-		# prepare the requests
+		# start up the sensor threads
+		session = requests.Session()
 		for sensor in self.sensors:
 			request = requests.Request(sensor.httpMethod, sensor.url, data = sensor.body, headers = sensor.headers)
 			preppedRequest = request.prepare()
-			preppedRequests.append(preppedRequest)
-		
-		session = requests.Session()		
-		
-		for req in preppedRequests:
-			t = threading.Thread(target = self.__testSensor, args = (session, req))
+			
+			t = threading.Thread(target = self.__testSensor, args = (session, preppedRequest, sensor.testInterval))
 			t.daemon = True
 			t.start()
 		
-		# print responses
-		response = self.q.get()
-		
-		print(response.status_code)
-		print(str(self.__timedelta_milliseconds(response.elapsed)) + ' ms')
-		print(response.json())
-		
-		self.q.task_done()
-			
 		# block until all tasks are done
 		self.q.join()
+		consumer.join()
 		
 
 # Testing with Spotify API
@@ -64,8 +70,8 @@ headers = {}
 headers['content-type'] = 'application/json'
 
 # Using some existing test users
-sensor1 = Sensor('https://api.spotify.com/v1/users/test1', 'GET', headers, None, 200, 30000, 60000)
-sensor2 = Sensor('https://api.spotify.com/v1/users/test2', 'GET', headers, None, 200, 30000, 60000)
+sensor1 = Sensor('https://api.spotify.com/v1/users/test1', 'GET', headers, None, 200, 30000, 3.0)
+sensor2 = Sensor('https://api.spotify.com/v1/users/test2', 'GET', headers, None, 200, 30000, 7.0)
 
 monitor = Monitor()
 monitor.addSensor(sensor1)
