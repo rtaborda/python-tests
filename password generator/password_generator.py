@@ -7,9 +7,10 @@ import string
 import random
 
 class PasswordGenerator:
-	def __init__(self):
+	def __init__(self, useSpecialCharacters):
 		self.specialCharacters = [ '£', '$', '€', '%', '&', '*', '@', '#' ]
 		self.minSize = 10
+		self.useSpecialCharacters = useSpecialCharacters
 		
 	def generatePassword(self, size):
 		if size < self.minSize:
@@ -18,7 +19,14 @@ class PasswordGenerator:
 		count = 0
 		password = ''
 		while count < size:	
-			number = int(random.SystemRandom().choice(string.digits))
+			# Because of the random nature of the algorithm implemented here, setting the useSpecialCharacters to true
+			# doesn't guarantee that the password will actually have any special characters (fix this later)
+			if self.useSpecialCharacters:
+				upperLimit = 9
+			else:
+				upperLimit = 6
+		
+			number = random.randint(0, upperLimit)
 			
 			if number <= 3:
 				password += random.SystemRandom().choice(string.ascii_letters)

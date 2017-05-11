@@ -2,9 +2,10 @@
 
 from password_generator import * 
 
-passwordGenerator = PasswordGenerator()
-
-print('Welcome to the Password Generator console app! Type "exit" at anytime to close the app')
+print('Welcome to the Password Generator console app!')
+useSpecialChars = input('Do you want to use special characters in the generated password? (y/n): ')
+passwordGenerator = PasswordGenerator(useSpecialChars == 'y')
+print('Type "exit" at anytime to close the app')
 print('--------------------------------------------')
 
 while True:
