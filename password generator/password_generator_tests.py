@@ -14,8 +14,17 @@ class PasswordGeneratorTests(unittest.TestCase):
 		size = random.randint(10, 9999)
 		password = self.generator.generatePassword(size)
 		self.assertEqual(size, len(password))
-		
-	# TODO Add tests for passwords with and withous special characters
+	
+	def test_generatePassword_usesSpecialCharacters(self):
+		size = random.randint(10, 9999)
+		password = self.generator.generatePassword(size)
+		self.assertTrue(any((c in self.generator.specialCharacters) for c in password))
+	
+	def test_generatePassword_doesNotUseSpecialCharacters(self):
+		self.generator.useSpecialCharacters = False
+		size = random.randint(10, 9999)
+		password = self.generator.generatePassword(size)
+		self.assertTrue(not any((c in self.generator.specialCharacters) for c in password))
 		
 if __name__ == '__main__':
     unittest.main()

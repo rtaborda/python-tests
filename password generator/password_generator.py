@@ -19,8 +19,6 @@ class PasswordGenerator:
 		count = 0
 		password = ''
 		while count < size:	
-			# Because of the random nature of the algorithm implemented here, setting the useSpecialCharacters to true
-			# doesn't guarantee that the password will actually have any special characters (fix this later)
 			if self.useSpecialCharacters:
 				upperLimit = 9
 			else:
@@ -36,5 +34,9 @@ class PasswordGenerator:
 				password += random.SystemRandom().choice(self.specialCharacters)
 			
 			count = count + 1
+		
+		# Make sure that the password has at least one special character if useSpecialCharacters has been set to true
+		if self.useSpecialCharacters and not any((c in self.specialCharacters) for c in password):
+			password = password.replace(random.SystemRandom().choice(password), random.SystemRandom().choice(self.specialCharacters))
 		
 		return password
