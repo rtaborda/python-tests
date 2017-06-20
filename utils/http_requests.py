@@ -27,13 +27,14 @@ class Monitor:
 		while True:
 			response = session.send(request)
 			self.q.put(response)
-			#time.sleep(1)
+			time.sleep(interval)
 	
 	def __consumer(self):
 		while True:
 			# print responses
 			response = self.q.get()
-		
+			
+			print(response.url)
 			print(response.status_code)
 			print(str(self.__timedelta_milliseconds(response.elapsed)) + ' ms')
 			print(response.json())
