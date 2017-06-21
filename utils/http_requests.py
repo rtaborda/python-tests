@@ -83,7 +83,7 @@ class Monitor:
 
 # Test Client
 def main():
-	def consumer(monitor):
+	def consumeResults(monitor):
 		while monitor.isRunning:
 			# Reading the sensors results responses
 			sensorResult = monitor.resultsQueue.get()
@@ -108,7 +108,7 @@ def main():
 	monitor.startSensors()
 	
 	# Start consumer thread
-	consumer = threading.Thread(target = consumer, args = [monitor])
+	consumer = threading.Thread(target = consumeResults, args = [monitor])
 	consumer.daemon = True
 	consumer.start()
 	
