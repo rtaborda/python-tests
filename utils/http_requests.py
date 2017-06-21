@@ -6,6 +6,7 @@ import threading
 import time
 import uuid
 
+# This class represents a sensor
 class Sensor:
 	def __init__(self, url, httpMethod, headers, body, expectedStatusCode, maxResponsetime, testInterval):
 		self.id = uuid.uuid4()
@@ -17,60 +18,78 @@ class Sensor:
 		self.maxResponsetime = maxResponsetime
 		self.testInterval = testInterval
 
+# This class represents a sensor result, every time a sensor is tested a SensorResult is created
 class SensorResult:
-	def __init__(self, sensorId, response):
+	def __init__(self, sensorId, success, elapsedMilliseconds):
 		self.sensorId = sensorId
-		self.response = response
-		
+		self.success = success
+		self.elapsedMilliseconds = elapsedMilliseconds
+
+# This class handles the sensors, performs the tests on the sensor and generates the results
 class Monitor:
 	def __init__(self):
 		self._sensors = []
+		self._running = False
 		manager = multiprocessing.Manager()
 		self.resultsQueue = manager.Queue()
 	
 	def __timedelta_milliseconds(self, td):
 		return td.days*86400000 + td.seconds*1000 + td.microseconds/1000
 
+	def __buildSensorResult(self, sensor, response):
+		elapsedMilliseconds = self.__timedelta_milliseconds(response.elapsed)
+		success = response.status_code == sensor.expectedStatusCode and elapsedMilliseconds <= sensor.maxResponsetime
+	
+		return SensorResult(sensor.id, success, elapsedMilliseconds)
+		
 	def __testSensor(self, session, request, sensor):
-		while True:
+		while self._running:
 			response = session.send(request)
-			# add result to the queue
-			self.resultsQueue.put(SensorResult(sensor.id, response))
-			# sleep for the interval duration specified for this sensor
+			
+			# Add result to the queue
+			result = self.__buildSensorResult(sensor, response)
+			self.resultsQueue.put(result)
+			
+			# Sleep for the interval duration specified for this sensor
 			time.sleep(sensor.testInterval)
 	
 	def addSensor(self, sensor):
 		self._sensors.append(sensor)
 		
 	def startSensors(self):
-		# start up the sensor threads
+		self._running = True
+		
+		# Start up the sensor threads
 		session = requests.Session()
 		for sensor in self._sensors:
 			request = requests.Request(sensor.httpMethod, sensor.url, data = sensor.body, headers = sensor.headers)
 			preppedRequest = request.prepare()
 			
-			t = threading.Thread(target = self.__testSensor, args = (session, preppedRequest, sensor))
-			t.daemon = True
-			t.start()
+			thread = threading.Thread(target = self.__testSensor, args = (session, preppedRequest, sensor))
+			thread.daemon = True
+			thread.start()
 		
-		# block until all tasks are done
+		# Block until all tasks are done
 		self.resultsQueue.join()
-		
+	
+	def isRunning(self):
+		return self._running;
+	
+	def stopSensors(self):
+		self._running = False
 
+
+		
 
 # Test Client
 def main():
 	def consumer(monitor):
-		while True:
+		while monitor.isRunning:
 			# Reading the sensors results responses
 			sensorResult = monitor.resultsQueue.get()
-			response = sensorResult.response
-			
 			print(sensorResult.sensorId)
-			print(response.url)
-			print(response.status_code)
-			#print(str(self.__timedelta_milliseconds(response.elapsed)) + ' ms')
-			print(response.json())
+			print('success' if sensorResult.success else 'failed')
+			print(str(sensorResult.elapsedMilliseconds) + ' ms')
 			print()
 		
 			monitor.resultsQueue.task_done()
@@ -88,12 +107,14 @@ def main():
 	monitor.addSensor(sensor2)
 	monitor.startSensors()
 	
-	# start consumer thread
+	# Start consumer thread
 	consumer = threading.Thread(target = consumer, args = [monitor])
 	consumer.daemon = True
 	consumer.start()
-	# block until all tasks are done
-	consumer.join()
+	
+	# Stop the sensors after 60 seconds
+	time.sleep(60.0)
+	monitor.stopSensors()
 
 if __name__ == "__main__":
     main()
